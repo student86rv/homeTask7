@@ -1,7 +1,7 @@
-package ua.epam.hometask7.controller;
+package ua.epam.homeTask7.controller;
 
-import ua.epam.hometask7.model.Skill;
-import ua.epam.hometask7.repository.javaIO.JavaIOSkillRepo;
+import ua.epam.homeTask7.model.Skill;
+import ua.epam.homeTask7.repository.javaIO.JavaIOSkillRepo;
 
 import java.util.ArrayList;
 import java.util.List;

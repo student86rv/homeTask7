@@ -3,8 +3,8 @@ package ua.epam.homeTask7;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import ua.epam.hometask7.model.Skill;
-import ua.epam.hometask7.repository.javaIO.JavaIOSkillRepo;
+import ua.epam.homeTask7.model.Skill;
+import ua.epam.homeTask7.repository.javaIO.JavaIOSkillRepo;
 
 public class JavaIOSkillRepoTest {
 

@@ -1,6 +1,6 @@
-package ua.epam.hometask7;
+package ua.epam.homeTask7;
 
-import ua.epam.hometask7.view.SkillView;
+import ua.epam.homeTask7.view.SkillView;
 
 public class AppRunner {
 

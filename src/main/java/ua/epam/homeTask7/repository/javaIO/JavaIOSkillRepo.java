@@ -1,9 +1,9 @@
-package ua.epam.hometask7.repository.javaIO;
+package ua.epam.homeTask7.repository.javaIO;
 
 import com.google.gson.Gson;
 
-import ua.epam.hometask7.model.Skill;
-import ua.epam.hometask7.repository.SkillRepository;
+import ua.epam.homeTask7.model.Skill;
+import ua.epam.homeTask7.repository.SkillRepository;
 
 import java.io.*;
 import java.util.ArrayList;

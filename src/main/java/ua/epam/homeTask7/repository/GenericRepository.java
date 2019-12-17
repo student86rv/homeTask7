@@ -1,4 +1,4 @@
-package ua.epam.hometask7.repository;
+package ua.epam.homeTask7.repository;
 
 import java.util.List;
 

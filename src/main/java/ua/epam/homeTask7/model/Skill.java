@@ -1,4 +1,4 @@
-package ua.epam.hometask7.model;
+package ua.epam.homeTask7.model;
 
 import java.util.Objects;
 

@@ -1,6 +1,6 @@
-package ua.epam.hometask7.view;
+package ua.epam.homeTask7.view;
 
-import ua.epam.hometask7.controller.SkillController;
+import ua.epam.homeTask7.controller.SkillController;
 
 import java.util.List;
 import java.util.Scanner;
