@@ -1,10 +1,9 @@
 package ua.epam.homeTask7.repository.javaIO;
 
-import com.google.gson.Gson;
-
 import ua.epam.homeTask7.model.Skill;
 import ua.epam.homeTask7.repository.SkillRepository;
 
+import com.google.gson.Gson;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,17 +19,17 @@ public class JavaIOSkillRepo implements SkillRepository {
 
     private List<Skill> skillsList = new ArrayList<>();
     private File skillsFile;
-    private int count;
+    private long count;
 
     public JavaIOSkillRepo() {
         this.skillsFile = new File(PATH, FILE_NAME);
         if (skillsFile.exists()) {
             this.skillsList = readFromFile(skillsFile);
-            count = skillsList.size();
+            count = getMaxId();
         } else {
             try {
                 skillsFile.createNewFile();
-                count = 0;
+                count = 1;
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -83,6 +82,25 @@ public class JavaIOSkillRepo implements SkillRepository {
         }
         writeToFile(skillsList, skillsFile);
         return removedSkill;
+    }
+
+    private long getMaxId() {
+        skillsList = readFromFile(skillsFile);
+        long[] iDs = new long[skillsList.size()];
+        for (int i = 0; i < skillsList.size(); i++) {
+            iDs[i] = skillsList.get(i).getId();
+        }
+        return findMax(iDs);
+    }
+
+    private long findMax(long[] arr) {
+        long max = arr[0];
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] > max) {
+                max = arr[i];
+            }
+        }
+        return max;
     }
 
     private List<Skill> readFromFile(File file) {
