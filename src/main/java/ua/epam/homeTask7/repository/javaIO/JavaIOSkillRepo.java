@@ -123,11 +123,11 @@ public class JavaIOSkillRepo implements SkillRepository {
     private void writeToFile(List<Skill> skills, File file) {
         Gson gson = new Gson();
         try {
-           BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-           for (Skill skill: skills) {
-               String jsonString = gson.toJson(skill);
-               bw.write(jsonString + "\n");
-           }
+            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+            for (Skill skill: skills) {
+                String jsonString = gson.toJson(skill);
+                bw.write(jsonString + "\n");
+            }
             bw.close();
         } catch (IOException e) {
             e.printStackTrace();
