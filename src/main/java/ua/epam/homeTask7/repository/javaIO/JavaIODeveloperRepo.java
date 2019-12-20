@@ -106,7 +106,7 @@ public class JavaIODeveloperRepo implements DeveloperRepository {
     private Developer fromSimpleModel(DeveloperSimpleModel model) {
         Set<Skill> skillSet = getSkillsFromRepo(model.getSkillsId());
         Account account = getAccountFromRepo(model.getAccountId());
-        return new Developer(model.getId(), model.getFirstName(),
+        return new Developer(model.getId(), model.getName(),
                 model.getLastName(), skillSet, account);
     }
 
