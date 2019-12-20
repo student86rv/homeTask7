@@ -11,6 +11,11 @@ public class Account {
     public Account() {
     }
 
+    public Account(long id, String email) {
+        this.id = id;
+        this.email = email;
+    }
+
     public Account(String email, AccountStatus status) {
         this.email = email;
         this.status = status;
