@@ -1,1 +1,3 @@
 {"id":1,"name":"Ivan Ivanov","skillsId":[1,3],"accountId":1}
+{"id":2,"name":"Petr Petrov","skillsId":[2],"accountId":2}
+{"id":3,"name":"Sidor Sidorov","skillsId":[3,4],"accountId":3}

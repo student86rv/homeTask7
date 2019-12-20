@@ -1,6 +1,7 @@
 package ua.epam.homeTask7;
 
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 import ua.epam.homeTask7.model.Skill;
