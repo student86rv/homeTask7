@@ -26,7 +26,7 @@ public class JavaIOAccountRepo implements AccountReposirory {
 
         if (accountsFile.exists()) {
             this.accountsList = readFromFile(accountsFile);
-            count = getMaxId();
+            count = getMaxId() + 1;
         } else {
             try {
                 accountsFile.createNewFile();
@@ -100,16 +100,16 @@ public class JavaIOAccountRepo implements AccountReposirory {
     }
 
     private long findMax(long[] arr) {
-        if (arr.length > 0) {
-            long max = arr[0];
-            for (int i = 0; i < arr.length; i++) {
-                if (arr[i] > max) {
-                    max = arr[i];
-                }
-            }
-            return max;
+        if (arr == null || arr.length == 0) {
+            return 1;
         }
-        return 1;
+        long max = arr[0];
+        for (long item : arr) {
+            if (item > max) {
+                max = item;
+            }
+        }
+        return max;
     }
 
     private List<Account> readFromFile(File file) {

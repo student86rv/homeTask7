@@ -30,7 +30,7 @@ public class JavaIODeveloperRepo implements DeveloperRepository {
         this.developersFile = new File(PATH, FILE_NAME);
         if (developersFile.exists()) {
             this.developersList = readFromFile(developersFile);
-            count = getMaxId();
+            count = getMaxId() + 1;
         } else {
             try {
                 developersFile.createNewFile();
@@ -133,16 +133,16 @@ public class JavaIODeveloperRepo implements DeveloperRepository {
     }
 
     private long findMax(long[] arr) {
-        if (arr.length > 0) {
-            long max = arr[0];
-            for (int i = 0; i < arr.length; i++) {
-                if (arr[i] > max) {
-                    max = arr[i];
-                }
-            }
-            return max;
+        if (arr == null || arr.length == 0) {
+            return 1;
         }
-        return 1;
+        long max = arr[0];
+        for (long item : arr) {
+            if (item > max) {
+                max = item;
+            }
+        }
+        return max;
     }
 
     private List<DeveloperSimpleModel> readFromFile(File file) {

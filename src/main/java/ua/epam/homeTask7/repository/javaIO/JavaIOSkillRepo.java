@@ -4,6 +4,7 @@ import ua.epam.homeTask7.model.Skill;
 import ua.epam.homeTask7.repository.SkillRepository;
 
 import com.google.gson.Gson;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,7 @@ public class JavaIOSkillRepo implements SkillRepository {
         this.skillsFile = new File(PATH, FILE_NAME);
         if (skillsFile.exists()) {
             this.skillsList = readFromFile(skillsFile);
-            count = getMaxId();
+            count = getMaxId() + 1;
         } else {
             try {
                 skillsFile.createNewFile();
@@ -94,16 +95,16 @@ public class JavaIOSkillRepo implements SkillRepository {
     }
 
     private long findMax(long[] arr) {
-        if (arr.length > 0) {
-            long max = arr[0];
-            for (int i = 0; i < arr.length; i++) {
-                if (arr[i] > max) {
-                    max = arr[i];
-                }
-            }
-            return max;
+        if (arr == null || arr.length == 0) {
+            return 1;
         }
-        return 1;
+        long max = arr[0];
+        for (long item : arr) {
+            if (item > max) {
+                max = item;
+            }
+        }
+        return max;
     }
 
     private List<Skill> readFromFile(File file) {
@@ -127,7 +128,7 @@ public class JavaIOSkillRepo implements SkillRepository {
         Gson gson = new Gson();
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-            for (Skill skill: skills) {
+            for (Skill skill : skills) {
                 String jsonString = gson.toJson(skill);
                 bw.write(jsonString + "\n");
             }
