@@ -21,8 +21,8 @@ public class AppView {
 
             switch (menuChoice) {
                 case 1:
-//                    DeveloperView developerView = new DeveloperView();
-//                    developerView.run();
+                    DeveloperView developerView = new DeveloperView();
+                    developerView.run();
                     break;
                 case 2:
                     AccountView accountView = new AccountView();

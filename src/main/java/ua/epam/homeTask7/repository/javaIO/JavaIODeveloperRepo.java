@@ -106,8 +106,7 @@ public class JavaIODeveloperRepo implements DeveloperRepository {
     private Developer fromSimpleModel(DeveloperSimpleModel model) {
         Set<Skill> skillSet = getSkillsFromRepo(model.getSkillsId());
         Account account = getAccountFromRepo(model.getAccountId());
-        return new Developer(model.getId(), model.getName(),
-                model.getLastName(), skillSet, account);
+        return new Developer(model.getId(), model.getName(), skillSet, account);
     }
 
     private Set<Skill> getSkillsFromRepo(long[] skillsId) {
@@ -134,13 +133,16 @@ public class JavaIODeveloperRepo implements DeveloperRepository {
     }
 
     private long findMax(long[] arr) {
-        long max = arr[0];
-        for (int i = 0; i < arr.length; i++) {
-            if (arr[i] > max) {
-                max = arr[i];
+        if (arr.length > 0) {
+            long max = arr[0];
+            for (int i = 0; i < arr.length; i++) {
+                if (arr[i] > max) {
+                    max = arr[i];
+                }
             }
+            return max;
         }
-        return max;
+        return 1;
     }
 
     private List<DeveloperSimpleModel> readFromFile(File file) {

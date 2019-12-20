@@ -100,13 +100,16 @@ public class JavaIOAccountRepo implements AccountReposirory {
     }
 
     private long findMax(long[] arr) {
-        long max = arr[0];
-        for (int i = 0; i < arr.length; i++) {
-            if (arr[i] > max) {
-                max = arr[i];
+        if (arr.length > 0) {
+            long max = arr[0];
+            for (int i = 0; i < arr.length; i++) {
+                if (arr[i] > max) {
+                    max = arr[i];
+                }
             }
+            return max;
         }
-        return max;
+        return 1;
     }
 
     private List<Account> readFromFile(File file) {
