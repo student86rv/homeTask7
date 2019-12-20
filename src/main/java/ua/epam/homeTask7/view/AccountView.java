@@ -10,7 +10,7 @@ public class AccountView {
     private AccountController controller = new AccountController();
 
     private final String MENU_HEADER = "Accounts menu:";
-    private final String MENU_SEPARATOR = "________________________";
+    private final String MENU_SEPARATOR = "__________________________";
     private final String MENU_ENTRIES = "1: Add new account" + "\n" +
             "2: Get account by ID" + "\n" +
             "3: View all accounts" + "\n" +

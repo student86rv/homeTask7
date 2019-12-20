@@ -12,7 +12,7 @@ public class DeveloperView {
     private DeveloperController controller = new DeveloperController();
 
     private final String MENU_HEADER = "Developers menu:";
-    private final String MENU_SEPARATOR = "________________________";
+    private final String MENU_SEPARATOR = "____________________________";
     private final String MENU_ENTRIES = "1: Add new developer" + "\n" +
             "2: Get developer by ID" + "\n" +
             "3: View all developers" + "\n" +

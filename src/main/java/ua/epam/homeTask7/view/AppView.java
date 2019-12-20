@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 public class AppView {
     private final String MENU_HEADER = "Main menu:";
-    private final String MENU_SEPARATOR = "______________";
+    private final String MENU_SEPARATOR = "_____________";
     private final String MENU_ENTRIES = "1: Developers" + "\n" +
             "2: Accounts" + "\n" +
             "3: Skills" + "\n" +

@@ -96,7 +96,7 @@ public class JavaIOSkillRepo implements SkillRepository {
 
     private long findMax(long[] arr) {
         if (arr == null || arr.length == 0) {
-            return 1;
+            return 0;
         }
         long max = arr[0];
         for (long item : arr) {
