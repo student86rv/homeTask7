@@ -14,7 +14,7 @@ INSERT INTO developers (name, account_id) VALUES
     ('Petr Petrov', 2),
     ('Sidor Sidorov', 3);
 
-INSERT INTO skills_in_developers (developer_id, skill_id) VALUES
+INSERT INTO developer_skills (developer_id, skill_id) VALUES
 	(1, 1),
     (1, 3),
     (2, 2),

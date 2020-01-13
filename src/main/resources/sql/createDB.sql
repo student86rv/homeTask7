@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS developers (
     FOREIGN KEY (account_id) REFERENCES accounts (id)
 );
 
-CREATE TABLE IF NOT EXISTS skills_in_developers (
+CREATE TABLE IF NOT EXISTS developer_skills (
     developer_id INT NOT NULL,
     skill_id INT NOT NULL,
     UNIQUE (developer_id, skill_id),
