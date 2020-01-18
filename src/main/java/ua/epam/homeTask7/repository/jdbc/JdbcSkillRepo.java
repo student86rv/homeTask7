@@ -2,60 +2,34 @@ package ua.epam.homeTask7.repository.jdbc;
 
 import ua.epam.homeTask7.model.Skill;
 import ua.epam.homeTask7.repository.SkillRepository;
+import ua.epam.homeTask7.util.ConfigReader;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
-import java.util.TimeZone;
 
 public class JdbcSkillRepo implements SkillRepository {
 
-    private String databaseUrl;
-    private String user;
-    private String password;
-
+    private ConfigReader configReader = ConfigReader.getInstance();
     private Connection connection;
 
-    static {
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
     public JdbcSkillRepo() {
-        setDbConfig();
         try {
-            this.connection = DriverManager.getConnection(databaseUrl, user, password);
+            this.connection = DriverManager.getConnection(configReader.getUrl(),
+                    configReader.getUser(), configReader.getPassword());
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    private void setDbConfig() {
-        Properties properties = new Properties();
-        try (FileInputStream fis = new FileInputStream("src/main/resources/local.properties")) {
-            properties.load(fis);
-            this.databaseUrl = properties.getProperty("db.url") +
-                    "?serverTimezone=" +
-                    TimeZone.getDefault().getID();
-            this.user = properties.getProperty("db.username");
-            this.password = properties.getProperty("db.password");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        createSkillsTable();
     }
 
     private void createSkillsTable() {
         try (Statement statement = connection.createStatement()) {
-            String sqlQuery = "CREATE TABLE IF NOT EXISTS skills (" +
-                    "id INT PRIMARY KEY AUTO_INCREMENT," +
-                    "name VARCHAR(255) NOT NULL" +
+            String createQuery = "CREATE TABLE IF NOT EXISTS skills (\n" +
+                    "id INT PRIMARY KEY AUTO_INCREMENT,\n" +
+                    "name VARCHAR(255) NOT NULL\n" +
                     ");";
-            statement.execute(sqlQuery);
+            statement.execute(createQuery);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -64,12 +38,12 @@ public class JdbcSkillRepo implements SkillRepository {
     @Override
     public void add(Skill entity) {
         try (Statement statement = connection.createStatement()) {
-            String insertQuery = String.format("INSERT INTO skills (name)" +
-                    "VALUES ('%s');", entity.getName());
+            String insertQuery = String.format("INSERT INTO skills (name) VALUES ('%s');",
+                    entity.getName());
             statement.execute(insertQuery);
 
-            String getIdQuery = String.format("SELECT id FROM skills" +
-                    "WHERE name = '%s';", entity.getName());
+            String getIdQuery = String.format("SELECT id FROM skills WHERE name = '%s';",
+                    entity.getName());
             ResultSet rs = statement.executeQuery(getIdQuery);
             int id = 0;
             while (rs.next()) {
@@ -85,8 +59,7 @@ public class JdbcSkillRepo implements SkillRepository {
     public Skill get(Long id) {
         Skill skill = new Skill();
         try (Statement statement = connection.createStatement()) {
-            String getSkillQuery = String.format("SELECT * FROM skills" +
-                    "WHERE id = '%d';", id);
+            String getSkillQuery = String.format("SELECT * FROM skills WHERE id = '%d';", id);
             ResultSet rs = statement.executeQuery(getSkillQuery);
             while (rs.next()) {
                 skill.setId(rs.getInt("id"));
@@ -100,16 +73,43 @@ public class JdbcSkillRepo implements SkillRepository {
 
     @Override
     public List<Skill> getAll() {
-        return null;
+        List<Skill> skills = new ArrayList<>();
+        try (Statement statement = connection.createStatement()) {
+            String getAllQuery = "SELECT * FROM skills ORDER BY id;";
+            ResultSet rs = statement.executeQuery(getAllQuery);
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name  = rs.getString("name");
+                skills.add(new Skill(id, name));
+            }
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return skills;
     }
 
     @Override
     public boolean update(Skill entity) {
-        return false;
+        int updated = 0;
+        try (Statement statement = connection.createStatement()) {
+            String updateQuery = String.format("UPDATE skills SET name = ('%s') WHERE id = '%d';",
+                    entity.getName(), entity.getId());
+            updated = statement.executeUpdate(updateQuery);
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return updated > 0;
     }
 
     @Override
-    public Skill remove(Long aLong) {
-        return null;
+    public Skill remove(Long id) {
+        Skill skill = get(id);
+        try (Statement statement = connection.createStatement()) {
+            String removeQuery = String.format("DELETE FROM skills WHERE id = '%d';", id);
+            statement.execute(removeQuery);
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return skill;
     }
 }

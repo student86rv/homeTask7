@@ -1,4 +1,4 @@
-package ua.epam.homeTask7;
+package ua.epam.homeTask7.javaIO;
 
 import org.junit.Test;
 
