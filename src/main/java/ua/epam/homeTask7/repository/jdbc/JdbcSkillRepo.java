@@ -90,15 +90,15 @@ public class JdbcSkillRepo implements SkillRepository {
 
     @Override
     public boolean update(Skill entity) {
-        int updated = 0;
+        int updatedRows = 0;
         try (Statement statement = connection.createStatement()) {
             String updateQuery = String.format("UPDATE skills SET name = ('%s') WHERE id = '%d';",
                     entity.getName(), entity.getId());
-            updated = statement.executeUpdate(updateQuery);
+            updatedRows = statement.executeUpdate(updateQuery);
         }catch (SQLException e) {
             e.printStackTrace();
         }
-        return updated > 0;
+        return updatedRows > 0;
     }
 
     @Override
