@@ -20,8 +20,23 @@ public class JdbcSkillRepoTest {
     public void addAndGetTest() {
         Skill skill = new Skill("Some new skill");
         repo.add(skill);
+        long id = skill.getId();
+        Skill skill2 = repo.get(id);
 
-        System.out.println(repo.get(skill.getId()));
+        assertEquals(skill, skill2);
+
+        repo.remove(id);
+    }
+
+    @Test
+    public void removeTest() {
+        Skill skill = new Skill("Remove test skill");
+        repo.add(skill);
+        long id = skill.getId();
+        Skill skill2 = repo.remove(id);
+
+        assertEquals(skill, skill2);
+        assertNull(repo.get(id));
     }
 
 }

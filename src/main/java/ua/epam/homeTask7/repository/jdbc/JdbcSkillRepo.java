@@ -59,12 +59,14 @@ public class JdbcSkillRepo implements SkillRepository {
     @Override
     public Skill get(Long id) {
         String getSkillQuery = String.format("SELECT * FROM skills WHERE id = '%d';", id);
-        Skill skill = new Skill();
+        Skill skill = null;
         try (Statement statement = connection.createStatement()) {
             ResultSet rs = statement.executeQuery(getSkillQuery);
             while (rs.next()) {
-                skill.setId(rs.getInt("id"));
-                skill.setName(rs.getString("name"));
+                skill = new Skill(
+                        rs.getInt("id"),
+                        rs.getString("name")
+                );
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -80,10 +82,10 @@ public class JdbcSkillRepo implements SkillRepository {
             ResultSet rs = statement.executeQuery(getAllQuery);
             while (rs.next()) {
                 int id = rs.getInt("id");
-                String name  = rs.getString("name");
+                String name = rs.getString("name");
                 skills.add(new Skill(id, name));
             }
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return skills;
@@ -96,7 +98,7 @@ public class JdbcSkillRepo implements SkillRepository {
         int updatedRows = 0;
         try (Statement statement = connection.createStatement()) {
             updatedRows = statement.executeUpdate(updateQuery);
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return updatedRows > 0;
@@ -108,7 +110,7 @@ public class JdbcSkillRepo implements SkillRepository {
         String removeQuery = String.format("DELETE FROM skills WHERE id = '%d';", id);
         try (Statement statement = connection.createStatement()) {
             statement.execute(removeQuery);
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return skill;

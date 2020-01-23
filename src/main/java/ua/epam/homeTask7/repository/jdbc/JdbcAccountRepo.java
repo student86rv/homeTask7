@@ -60,13 +60,15 @@ public class JdbcAccountRepo implements AccountReposirory {
     @Override
     public Account get(Long id) {
         String getAccountQuery = String.format("SELECT * FROM accounts WHERE id = '%d';", id);
-        Account account = new Account();
+        Account account = null;
         try (Statement statement = connection.createStatement()) {
             ResultSet rs = statement.executeQuery(getAccountQuery);
             while (rs.next()) {
-                account.setId(rs.getInt("id"));
-                account.setEmail(rs.getString("email"));
-                account.setStatus(AccountStatus.valueOf(rs.getString("status")));
+                account = new Account(
+                        rs.getInt("id"),
+                        rs.getString("email"),
+                        AccountStatus.valueOf(rs.getString("status"))
+                );
             }
         } catch (SQLException e) {
             e.printStackTrace();

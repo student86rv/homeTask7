@@ -96,7 +96,7 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
         String getDevQuery = String.format("SELECT d.id id, d.name name, d.account_id account_id,\n" +
                 "a.email email, a.status status FROM developers d INNER JOIN accounts a\n" +
                 "ON account_id = a.id WHERE id = '%d'", id);
-        Developer developer = new Developer();
+        Developer developer = null;
         Set<Skill> skills = new HashSet<>();
 
         try (Statement statement = connection.createStatement()) {
@@ -104,13 +104,16 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
 
             ResultSet devRs = statement.executeQuery(getDevQuery);
             while (devRs.next()) {
-                developer.setId(devRs.getInt("id"));
-                developer.setName(devRs.getString("name"));
-                developer.setAccount(new Account(
-                        devRs.getInt("account_id"),
-                        devRs.getString("email"),
-                        AccountStatus.valueOf(devRs.getString("status"))
-                ));
+                developer = new Developer(
+                        devRs.getInt("id"),
+                        devRs.getString("name"),
+                        null,
+                        new Account(
+                                devRs.getInt("account_id"),
+                                devRs.getString("email"),
+                                AccountStatus.valueOf(devRs.getString("status"))
+                        )
+                );
             }
 
             ResultSet skillRs = statement.executeQuery(String.format(GET_SKILL_QUERY, id));
