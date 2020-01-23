@@ -25,12 +25,12 @@ public class JdbcAccountRepo implements AccountReposirory {
     }
 
     private void createAccountTable() {
+        String createQuery = "CREATE TABLE IF NOT EXISTS accounts (\n" +
+                "id INT PRIMARY KEY AUTO_INCREMENT,\n" +
+                "email VARCHAR(255) NOT NULL,\n" +
+                "status VARCHAR(255) NOT NULL\n" +
+                ");";
         try (Statement statement = connection.createStatement()) {
-            String createQuery = "CREATE TABLE IF NOT EXISTS accounts (\n" +
-                    "id INT PRIMARY KEY AUTO_INCREMENT,\n" +
-                    "email VARCHAR(255) NOT NULL,\n" +
-                    "status VARCHAR(255) NOT NULL\n" +
-                    ");";
             statement.execute(createQuery);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -39,13 +39,13 @@ public class JdbcAccountRepo implements AccountReposirory {
 
     @Override
     public void add(Account entity) {
-        try (Statement statement = connection.createStatement()) {
-            String insertQuery = String.format("INSERT INTO accounts (email, status) VALUES ('%s', '%s');",
-                    entity.getEmail(), entity.getStatus().toString());
-            statement.execute(insertQuery);
+        String insertQuery = String.format("INSERT INTO accounts (email, status) VALUES ('%s', '%s');",
+                entity.getEmail(), entity.getStatus().toString());
+        String getIdQuery = String.format("SELECT id FROM skills WHERE email = '%s';",
+                entity.getEmail());
 
-            String getIdQuery = String.format("SELECT id FROM skills WHERE email = '%s';",
-                    entity.getEmail());
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(insertQuery);
             ResultSet rs = statement.executeQuery(getIdQuery);
             int id = 0;
             while (rs.next()) {
@@ -59,9 +59,9 @@ public class JdbcAccountRepo implements AccountReposirory {
 
     @Override
     public Account get(Long id) {
+        String getAccountQuery = String.format("SELECT * FROM accounts WHERE id = '%d';", id);
         Account account = new Account();
         try (Statement statement = connection.createStatement()) {
-            String getAccountQuery = String.format("SELECT * FROM accounts WHERE id = '%d';", id);
             ResultSet rs = statement.executeQuery(getAccountQuery);
             while (rs.next()) {
                 account.setId(rs.getInt("id"));
@@ -76,9 +76,9 @@ public class JdbcAccountRepo implements AccountReposirory {
 
     @Override
     public List<Account> getAll() {
+        String getAllQuery = "SELECT * FROM accounts ORDER BY id;";
         List<Account> accounts = new ArrayList<>();
         try (Statement statement = connection.createStatement()) {
-            String getAllQuery = "SELECT * FROM accounts ORDER BY id;";
             ResultSet rs = statement.executeQuery(getAllQuery);
             while (rs.next()) {
                 int id = rs.getInt("id");
@@ -94,11 +94,11 @@ public class JdbcAccountRepo implements AccountReposirory {
 
     @Override
     public boolean update(Account entity) {
+        String updateQuery = String.format("UPDATE accounts SET email = '%s'," +
+                        "status = '%s' WHERE id = '%d';",
+                entity.getEmail(), entity.getStatus().toString(), entity.getId());
         int updatedRows = 0;
         try (Statement statement = connection.createStatement()) {
-            String updateQuery = String.format("UPDATE accounts SET email = '%s'," +
-                            "status = '%s' WHERE id = '%d';",
-                    entity.getEmail(), entity.getStatus().toString(), entity.getId());
             updatedRows = statement.executeUpdate(updateQuery);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -109,10 +109,10 @@ public class JdbcAccountRepo implements AccountReposirory {
     @Override
     public Account remove(Long id) {
         Account account = get(id);
+        String removeQuery = String.format("DELETE FROM accounts WHERE id = '%d';", id);
         try (Statement statement = connection.createStatement()) {
-            String removeQuery = String.format("DELETE FROM accounts WHERE id = '%d';", id);
             statement.execute(removeQuery);
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return account;

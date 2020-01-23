@@ -24,11 +24,11 @@ public class JdbcSkillRepo implements SkillRepository {
     }
 
     private void createSkillsTable() {
+        String createQuery = "CREATE TABLE IF NOT EXISTS skills (\n" +
+                "id INT PRIMARY KEY AUTO_INCREMENT,\n" +
+                "name VARCHAR(255) NOT NULL\n" +
+                ");";
         try (Statement statement = connection.createStatement()) {
-            String createQuery = "CREATE TABLE IF NOT EXISTS skills (\n" +
-                    "id INT PRIMARY KEY AUTO_INCREMENT,\n" +
-                    "name VARCHAR(255) NOT NULL\n" +
-                    ");";
             statement.execute(createQuery);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -37,13 +37,14 @@ public class JdbcSkillRepo implements SkillRepository {
 
     @Override
     public void add(Skill entity) {
+        String insertQuery = String.format("INSERT INTO skills (name) VALUES ('%s');",
+                entity.getName());
+        String getIdQuery = String.format("SELECT id FROM skills WHERE name = '%s';",
+                entity.getName());
+
         try (Statement statement = connection.createStatement()) {
-            String insertQuery = String.format("INSERT INTO skills (name) VALUES ('%s');",
-                    entity.getName());
             statement.execute(insertQuery);
 
-            String getIdQuery = String.format("SELECT id FROM skills WHERE name = '%s';",
-                    entity.getName());
             ResultSet rs = statement.executeQuery(getIdQuery);
             int id = 0;
             while (rs.next()) {
@@ -57,9 +58,9 @@ public class JdbcSkillRepo implements SkillRepository {
 
     @Override
     public Skill get(Long id) {
+        String getSkillQuery = String.format("SELECT * FROM skills WHERE id = '%d';", id);
         Skill skill = new Skill();
         try (Statement statement = connection.createStatement()) {
-            String getSkillQuery = String.format("SELECT * FROM skills WHERE id = '%d';", id);
             ResultSet rs = statement.executeQuery(getSkillQuery);
             while (rs.next()) {
                 skill.setId(rs.getInt("id"));
@@ -73,9 +74,9 @@ public class JdbcSkillRepo implements SkillRepository {
 
     @Override
     public List<Skill> getAll() {
+        String getAllQuery = "SELECT * FROM skills ORDER BY id;";
         List<Skill> skills = new ArrayList<>();
         try (Statement statement = connection.createStatement()) {
-            String getAllQuery = "SELECT * FROM skills ORDER BY id;";
             ResultSet rs = statement.executeQuery(getAllQuery);
             while (rs.next()) {
                 int id = rs.getInt("id");
@@ -90,10 +91,10 @@ public class JdbcSkillRepo implements SkillRepository {
 
     @Override
     public boolean update(Skill entity) {
+        String updateQuery = String.format("UPDATE skills SET name = ('%s') WHERE id = '%d';",
+                entity.getName(), entity.getId());
         int updatedRows = 0;
         try (Statement statement = connection.createStatement()) {
-            String updateQuery = String.format("UPDATE skills SET name = ('%s') WHERE id = '%d';",
-                    entity.getName(), entity.getId());
             updatedRows = statement.executeUpdate(updateQuery);
         }catch (SQLException e) {
             e.printStackTrace();
@@ -104,8 +105,8 @@ public class JdbcSkillRepo implements SkillRepository {
     @Override
     public Skill remove(Long id) {
         Skill skill = get(id);
+        String removeQuery = String.format("DELETE FROM skills WHERE id = '%d';", id);
         try (Statement statement = connection.createStatement()) {
-            String removeQuery = String.format("DELETE FROM skills WHERE id = '%d';", id);
             statement.execute(removeQuery);
         }catch (SQLException e) {
             e.printStackTrace();
