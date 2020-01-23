@@ -39,8 +39,7 @@ public class JdbcSkillRepo implements SkillRepository {
     public void add(Skill entity) {
         String insertQuery = String.format("INSERT INTO skills (name) VALUES ('%s');",
                 entity.getName());
-        String getIdQuery = String.format("SELECT id FROM skills WHERE name = '%s';",
-                entity.getName());
+        String getIdQuery = "SELECT MAX(id) id FROM skills;";
 
         try (Statement statement = connection.createStatement()) {
             statement.execute(insertQuery);

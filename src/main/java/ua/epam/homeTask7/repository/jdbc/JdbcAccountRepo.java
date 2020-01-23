@@ -41,8 +41,7 @@ public class JdbcAccountRepo implements AccountReposirory {
     public void add(Account entity) {
         String insertQuery = String.format("INSERT INTO accounts (email, status) VALUES ('%s', '%s');",
                 entity.getEmail(), entity.getStatus().toString());
-        String getIdQuery = String.format("SELECT id FROM skills WHERE email = '%s';",
-                entity.getEmail());
+        String getIdQuery = "SELECT MAX(id) id FROM accounts;";
 
         try (Statement statement = connection.createStatement()) {
             statement.execute(insertQuery);
