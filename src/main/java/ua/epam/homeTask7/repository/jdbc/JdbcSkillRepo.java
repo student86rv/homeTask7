@@ -7,8 +7,12 @@ import ua.epam.homeTask7.util.ConfigReader;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JdbcSkillRepo implements SkillRepository {
+
+    private static Logger logger = Logger.getLogger(JdbcSkillRepo.class.getName());
 
     private ConfigReader configReader = ConfigReader.getInstance();
     private Connection connection;
@@ -17,8 +21,9 @@ public class JdbcSkillRepo implements SkillRepository {
         try {
             this.connection = DriverManager.getConnection(configReader.getUrl(),
                     configReader.getUser(), configReader.getPassword());
+            logger.log(Level.INFO, "Repository connected to database");
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Connection to database failed");
         }
         createSkillsTable();
     }
@@ -31,7 +36,7 @@ public class JdbcSkillRepo implements SkillRepository {
         try (Statement statement = connection.createStatement()) {
             statement.execute(createQuery);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Table creating failed");
         }
     }
 
@@ -51,7 +56,7 @@ public class JdbcSkillRepo implements SkillRepository {
             }
             entity.setId(id);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Writing failed");
         }
     }
 
@@ -68,7 +73,7 @@ public class JdbcSkillRepo implements SkillRepository {
                 );
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Reading failed");
         }
         return skill;
     }
@@ -85,7 +90,7 @@ public class JdbcSkillRepo implements SkillRepository {
                 skills.add(new Skill(id, name));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Reading failed");
         }
         return skills;
     }
@@ -98,7 +103,7 @@ public class JdbcSkillRepo implements SkillRepository {
         try (Statement statement = connection.createStatement()) {
             updatedRows = statement.executeUpdate(updateQuery);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Updating failed");
         }
         return updatedRows > 0;
     }
@@ -110,7 +115,7 @@ public class JdbcSkillRepo implements SkillRepository {
         try (Statement statement = connection.createStatement()) {
             statement.execute(removeQuery);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Deleting failed");
         }
         return skill;
     }

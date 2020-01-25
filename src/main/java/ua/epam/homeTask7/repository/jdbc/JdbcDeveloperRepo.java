@@ -12,11 +12,15 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JdbcDeveloperRepo implements DeveloperRepository {
 
+    private static Logger logger = Logger.getLogger(JdbcDeveloperRepo.class.getName());
+
     private final String GET_SKILL_QUERY = "SELECT s.id id, s.name name FROM skills s INNER JOIN\n" +
-            "developer_skills d_s ON s.id = d_s.skill_id WHERE d_s.developer_id = '%d';";
+            "developer_skills d_s ON s.id = d_s.skill_id WHERE d_s.developer_id = '%d' ORDER BY name;";
     private final String INSERT_DEV_SKILL_QUERY = "INSERT INTO developer_skills (developer_id, skill_id)\n" +
             "VALUES ('%d', '%d');";
     private final String DELETE_DEV_SKILL_QUERY = "DELETE FROM developer_skills WHERE developer_id = '%d';";
@@ -28,8 +32,9 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
         try {
             this.connection = DriverManager.getConnection(configReader.getUrl(),
                     configReader.getUser(), configReader.getPassword());
+            logger.log(Level.INFO, "Repository connected to database");
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Connection to database failed");
         }
         createTables();
     }
@@ -53,7 +58,7 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
             statement.addBatch(createDSQuery);
             statement.executeBatch();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Tables creating failed");
         }
     }
 
@@ -62,7 +67,6 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
         String insertDevQuery = String.format("INSERT INTO developers (name, account_id)\n" +
                 "VALUES ('%s', '%d');", entity.getName(), entity.getAccount().getId());
         String getIdQuery = "SELECT MAX(id) id FROM developers;";
-
         try (Statement statement = connection.createStatement()) {
             connection.setAutoCommit(false);
             statement.execute(insertDevQuery);
@@ -78,16 +82,15 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
                 statement.addBatch(String.format(INSERT_DEV_SKILL_QUERY, id, skill.getId()));
             }
             statement.executeBatch();
-
             connection.commit();
             connection.setAutoCommit(true);
         } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Writing failed. Trying to cancel transaction...");
             try {
                 connection.rollback();
             } catch (SQLException e1) {
-                e1.printStackTrace();
+                logger.log(Level.SEVERE, "Transaction rollback failed");
             }
-            e.printStackTrace();
         }
     }
 
@@ -95,10 +98,9 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
     public Developer get(Long id) {
         String getDevQuery = String.format("SELECT d.id id, d.name name, d.account_id account_id,\n" +
                 "a.email email, a.status status FROM developers d INNER JOIN accounts a\n" +
-                "ON account_id = a.id WHERE id = '%d'", id);
+                "ON d.account_id = a.id WHERE d.id = '%d'", id);
         Developer developer = null;
         Set<Skill> skills = new HashSet<>();
-
         try (Statement statement = connection.createStatement()) {
             connection.setAutoCommit(false);
 
@@ -115,7 +117,6 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
                         )
                 );
             }
-
             ResultSet skillRs = statement.executeQuery(String.format(GET_SKILL_QUERY, id));
             while (skillRs.next()) {
                 skills.add(new Skill(
@@ -124,16 +125,15 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
                 ));
             }
             developer.setSkills(skills);
-
             connection.commit();
             connection.setAutoCommit(true);
         } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Reading failed. Trying to cancel transaction...");
             try {
                 connection.rollback();
             } catch (SQLException e1) {
-                e1.printStackTrace();
+                logger.log(Level.SEVERE, "Transaction rollback failed");
             }
-            e.printStackTrace();
         }
         return developer;
     }
@@ -144,7 +144,6 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
                 "a.email email, a.status status FROM developers d INNER JOIN accounts a\n" +
                 "ON account_id = a.id ORDER BY id";
         List<Developer> developers = new ArrayList<>();
-
         try (Statement statement = connection.createStatement()) {
             connection.setAutoCommit(false);
 
@@ -161,7 +160,6 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
                         )
                 ));
             }
-
             for (Developer developer : developers) {
                 Set<Skill> skills = new HashSet<>();
                 ResultSet skillRs = statement.executeQuery(String.format(GET_SKILL_QUERY, developer.getId()));
@@ -174,16 +172,15 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
                 }
                 developer.setSkills(skills);
             }
-
             connection.commit();
             connection.setAutoCommit(true);
         } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Reading failed. Trying to cancel transaction...");
             try {
                 connection.rollback();
             } catch (SQLException e1) {
-                e1.printStackTrace();
+                logger.log(Level.SEVERE, "Transaction rollback failed");
             }
-            e.printStackTrace();
         }
         return developers;
     }
@@ -194,7 +191,6 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
                         "account_id = '%d' WHERE id = '%d';",
                 entity.getName(), entity.getAccount().getId(), entity.getId());
         int updatedRows = 0;
-
         try (Statement statement = connection.createStatement()) {
             connection.setAutoCommit(false);
             updatedRows = statement.executeUpdate(updateDevQuery);
@@ -205,15 +201,14 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
                 statement.addBatch(String.format(INSERT_DEV_SKILL_QUERY, entity.getId(), skill.getId()));
             }
             statement.executeBatch();
-
             connection.commit();
             connection.setAutoCommit(true);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Updating failed. Trying to cancel transaction...");
             try {
                 connection.rollback();
             } catch (SQLException e1) {
-                e1.printStackTrace();
+                logger.log(Level.SEVERE, "Transaction rollback failed");
             }
         }
         return updatedRows > 0;
@@ -224,11 +219,11 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
         Developer developer = get(id);
         String deleteDevQuery = String.format("DELETE FROM developers WHERE id = '%d';", id);
         try (Statement statement = connection.createStatement()) {
-            statement.addBatch(DELETE_DEV_SKILL_QUERY);
             statement.addBatch(deleteDevQuery);
+            statement.addBatch(DELETE_DEV_SKILL_QUERY);
             statement.executeBatch();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Deleting failed. Trying to cancel transaction...");
         }
         return developer;
     }

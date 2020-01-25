@@ -8,8 +8,12 @@ import ua.epam.homeTask7.util.ConfigReader;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JdbcAccountRepo implements AccountReposirory {
+
+    private static Logger logger = Logger.getLogger(JdbcAccountRepo.class.getName());
 
     private ConfigReader configReader = ConfigReader.getInstance();
     private Connection connection;
@@ -18,8 +22,9 @@ public class JdbcAccountRepo implements AccountReposirory {
         try {
             this.connection = DriverManager.getConnection(configReader.getUrl(),
                     configReader.getUser(), configReader.getPassword());
+            logger.log(Level.INFO, "Repository connected to database");
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Connection to database failed");
         }
         createAccountTable();
     }
@@ -33,7 +38,7 @@ public class JdbcAccountRepo implements AccountReposirory {
         try (Statement statement = connection.createStatement()) {
             statement.execute(createQuery);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Table creating failed");
         }
     }
 
@@ -42,7 +47,6 @@ public class JdbcAccountRepo implements AccountReposirory {
         String insertQuery = String.format("INSERT INTO accounts (email, status) VALUES ('%s', '%s');",
                 entity.getEmail(), entity.getStatus().toString());
         String getIdQuery = "SELECT MAX(id) id FROM accounts;";
-
         try (Statement statement = connection.createStatement()) {
             statement.execute(insertQuery);
             ResultSet rs = statement.executeQuery(getIdQuery);
@@ -52,7 +56,7 @@ public class JdbcAccountRepo implements AccountReposirory {
             }
             entity.setId(id);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Writing failed");
         }
     }
 
@@ -70,7 +74,7 @@ public class JdbcAccountRepo implements AccountReposirory {
                 );
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Reading failed");
         }
         return account;
     }
@@ -88,7 +92,7 @@ public class JdbcAccountRepo implements AccountReposirory {
                 accounts.add(new Account(id, email, status));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Reading failed");
         }
         return accounts;
     }
@@ -102,7 +106,7 @@ public class JdbcAccountRepo implements AccountReposirory {
         try (Statement statement = connection.createStatement()) {
             updatedRows = statement.executeUpdate(updateQuery);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Updating failed");
         }
         return updatedRows > 0;
     }
@@ -114,7 +118,7 @@ public class JdbcAccountRepo implements AccountReposirory {
         try (Statement statement = connection.createStatement()) {
             statement.execute(removeQuery);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Deleting failed");
         }
         return account;
     }
