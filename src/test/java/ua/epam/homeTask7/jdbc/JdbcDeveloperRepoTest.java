@@ -50,7 +50,6 @@ public class JdbcDeveloperRepoTest {
     }
 
 
-
     @Test
     public void addAndGetTest() {
 
@@ -63,39 +62,40 @@ public class JdbcDeveloperRepoTest {
         assertEquals(developer, developer1);
         assertEquals(account, developer1.getAccount());
         assertEquals(skills, developer1.getSkills());
-//        developerRepo.remove(id);
+        developerRepo.remove(id);
     }
 
-//    @Test
-//    public void removeTest() {
-//        Developer developer = new Developer("Petr Petrov", skills, account);
-//        developerRepo.add(developer);
-//        long id = developer.getId();
-//        Developer developer1 = developerRepo.remove(id);
-//
-//        assertEquals(developer, developer1);
-//        assertNull(developerRepo.get(id));
-//    }
+    @Test
+    public void removeTest() {
+        Developer developer = new Developer("Petr Petrov", skills, account);
+        developerRepo.add(developer);
+        long id = developer.getId();
 
-//    @Test
-//    public void updateTest(){
-//        Account account = new Account("petr.petrov@ukr.net", AccountStatus.BANNED);
-//        repo.add(account);
-//        long id = account.getId();
-//
-//        Account newAccount = new Account(id,"sidor.sidorov@gmail.com", AccountStatus.ACTIVE);
-//        repo.update(newAccount);
-//
-//        assertEquals(repo.get(id), newAccount);
-//        repo.remove(id);
-//    }
+        Developer developer1 = developerRepo.remove(id);
 
-//    @AfterClass
-//    public static void removeFromDb() {
-//        accountRepo.remove(account.getId());
-//
-//        for (Skill skill : skills) {
-//            skillRepo.remove(skill.getId());
-//        }
-//    }
+        assertEquals(developer, developer1);
+        assertNull(developerRepo.get(id));
+    }
+
+    @Test
+    public void updateTest() {
+        Developer developer = new Developer("Sidor Sidorov", skills, account);
+        developerRepo.add(developer);
+        long id = developer.getId();
+
+        Developer developer1 = new Developer(id, "Vasili Pupkin", skills, account);
+        developerRepo.update(developer1);
+
+        assertEquals(developerRepo.get(id), developer1);
+        developerRepo.remove(id);
+    }
+
+    @AfterClass
+    public static void removeFromDb() {
+        accountRepo.remove(account.getId());
+
+        for (Skill skill : skills) {
+            skillRepo.remove(skill.getId());
+        }
+    }
 }

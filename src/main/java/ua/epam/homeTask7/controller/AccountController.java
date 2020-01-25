@@ -2,14 +2,15 @@ package ua.epam.homeTask7.controller;
 
 import ua.epam.homeTask7.model.Account;
 import ua.epam.homeTask7.model.AccountStatus;
-import ua.epam.homeTask7.repository.javaIO.JavaIOAccountRepo;
+import ua.epam.homeTask7.repository.AccountReposirory;
+import ua.epam.homeTask7.service.AccountService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AccountController {
 
-    private JavaIOAccountRepo repo = new JavaIOAccountRepo();
+    private AccountReposirory repository = new AccountService();
 
     private final String ACCOUNT_FORMAT = "id: %d, name: %s, status: %s";
     private final String NOT_FOUND_MSG = "Skill not found!";
@@ -29,12 +30,12 @@ public class AccountController {
                 break;
         }
 
-        repo.add(account);
+        repository.add(account);
         return account.getId();
     }
 
     public String getAccount(long id) {
-        Account account = repo.get(id);
+        Account account = repository.get(id);
         if (account == null) {
             return NOT_FOUND_MSG;
         }
@@ -44,7 +45,7 @@ public class AccountController {
 
     public List<String> getAllAccounts() {
         List<String> list = new ArrayList<>();
-        for (Account account: repo.getAll()) {
+        for (Account account: repository.getAll()) {
             list.add(String.format(ACCOUNT_FORMAT, account.getId(), account.getEmail(),
                     account.getStatus().toString()));
         }
@@ -64,10 +65,10 @@ public class AccountController {
                 account.setStatus(AccountStatus.DELETED);
                 break;
         }
-        return repo.update(account);
+        return repository.update(account);
     }
 
     public boolean removeAccount(long id) {
-        return repo.remove(id) != null;
+        return repository.remove(id) != null;
     }
 }
