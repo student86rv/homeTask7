@@ -7,23 +7,17 @@ import java.util.TimeZone;
 
 public class ConfigReader {
 
+    private static ConfigReader configReader;
+
+    private static final String DB_PROPERTIES_PATH = "src/main/resources/testDb.properties";
+
     private String url;
     private String user;
     private String password;
 
-    private static ConfigReader configReader;
-
-    static {
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
     private ConfigReader() {
         Properties properties = new Properties();
-        try (FileInputStream fis = new FileInputStream("src/main/resources/local.properties")) {
+        try (FileInputStream fis = new FileInputStream(DB_PROPERTIES_PATH)) {
             properties.load(fis);
             this.url = properties.getProperty("db.url") +
                     "?serverTimezone=" +
