@@ -9,7 +9,6 @@ import ua.epam.homeTask7.repository.jdbc.JdbcAccountRepo;
 import ua.epam.homeTask7.repository.jdbc.JdbcDeveloperRepo;
 import ua.epam.homeTask7.repository.jdbc.JdbcSkillRepo;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -49,6 +48,14 @@ public class JdbcDeveloperRepoTest {
         }
     }
 
+    @AfterClass
+    public static void removeFromDb() {
+        accountRepo.remove(account.getId());
+
+        for (Skill skill : skills) {
+            skillRepo.remove(skill.getId());
+        }
+    }
 
     @Test
     public void addAndGetTest() {
@@ -88,14 +95,5 @@ public class JdbcDeveloperRepoTest {
 
         assertEquals(developerRepo.get(id), developer1);
         developerRepo.remove(id);
-    }
-
-    @AfterClass
-    public static void removeFromDb() {
-        accountRepo.remove(account.getId());
-
-        for (Skill skill : skills) {
-            skillRepo.remove(skill.getId());
-        }
     }
 }

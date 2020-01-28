@@ -20,10 +20,10 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
     private static Logger logger = Logger.getLogger(JdbcDeveloperRepo.class.getName());
 
     private final String GET_SKILL_QUERY = "SELECT s.id id, s.name name FROM skills s INNER JOIN\n" +
-            "developer_skills d_s ON s.id = d_s.skill_id WHERE d_s.developer_id = '%d' ORDER BY name;";
+            "developer_skills d_s ON s.id = d_s.skill_id WHERE d_s.developer_id = %d ORDER BY id;";
     private final String INSERT_DEV_SKILL_QUERY = "INSERT INTO developer_skills (developer_id, skill_id)\n" +
-            "VALUES ('%d', '%d');";
-    private final String DELETE_DEV_SKILL_QUERY = "DELETE FROM developer_skills WHERE developer_id = '%d';";
+            "VALUES (%d, %d);";
+    private final String DELETE_DEV_SKILL_QUERY = "DELETE FROM developer_skills WHERE developer_id = %d;";
 
     private ConfigReader configReader = ConfigReader.getInstance();
     private Connection connection;
@@ -43,20 +43,21 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
         String createDevQuery = "CREATE TABLE IF NOT EXISTS developers (\n" +
                 "id INT PRIMARY KEY AUTO_INCREMENT,\n" +
                 "name VARCHAR(255) NOT NULL,\n" +
-                "account_id INT NOT NULL,\n" +
-                "FOREIGN KEY (account_id) REFERENCES accounts (id)\n" +
+                "account_id INT,\n" +
+                "FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE SET NULL\n" +
                 ");";
         String createDSQuery = "CREATE TABLE IF NOT EXISTS developer_skills (\n" +
                 "developer_id INT NOT NULL,\n" +
                 "skill_id INT NOT NULL,\n" +
                 "UNIQUE (developer_id, skill_id),\n" +
-                "FOREIGN KEY (developer_id) REFERENCES developers (id),\n" +
-                "FOREIGN KEY (skill_id) REFERENCES skills (id)\n" +
+                "FOREIGN KEY (developer_id) REFERENCES developers (id) ON DELETE CASCADE,\n" +
+                "FOREIGN KEY (skill_id) REFERENCES skills (id) ON DELETE CASCADE\n" +
                 ");";
         try (Statement statement = connection.createStatement()) {
             statement.addBatch(createDevQuery);
             statement.addBatch(createDSQuery);
             statement.executeBatch();
+            logger.log(Level.INFO, "New tables were created");
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Tables creating failed");
         }
@@ -65,19 +66,17 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
     @Override
     public void add(Developer entity) {
         String insertDevQuery = String.format("INSERT INTO developers (name, account_id)\n" +
-                "VALUES ('%s', '%d');", entity.getName(), entity.getAccount().getId());
+                "VALUES ('%s', %d);", entity.getName(), entity.getAccount().getId());
         String getIdQuery = "SELECT MAX(id) id FROM developers;";
         try (Statement statement = connection.createStatement()) {
             connection.setAutoCommit(false);
             statement.execute(insertDevQuery);
-
             ResultSet rs = statement.executeQuery(getIdQuery);
             int id = 0;
             while (rs.next()) {
                 id = rs.getInt("id");
             }
             entity.setId(id);
-
             for (Skill skill : entity.getSkills()) {
                 statement.addBatch(String.format(INSERT_DEV_SKILL_QUERY, id, skill.getId()));
             }
@@ -98,33 +97,28 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
     public Developer get(Long id) {
         String getDevQuery = String.format("SELECT d.id id, d.name name, d.account_id account_id,\n" +
                 "a.email email, a.status status FROM developers d INNER JOIN accounts a\n" +
-                "ON d.account_id = a.id WHERE d.id = '%d'", id);
-        Developer developer = null;
+                "ON d.account_id = a.id WHERE d.id = %d", id);
         Set<Skill> skills = new HashSet<>();
+        Developer developer = null;
         try (Statement statement = connection.createStatement()) {
             connection.setAutoCommit(false);
-
-            ResultSet devRs = statement.executeQuery(getDevQuery);
-            while (devRs.next()) {
-                developer = new Developer(
-                        devRs.getInt("id"),
-                        devRs.getString("name"),
-                        null,
-                        new Account(
-                                devRs.getInt("account_id"),
-                                devRs.getString("email"),
-                                AccountStatus.valueOf(devRs.getString("status"))
-                        )
-                );
-            }
             ResultSet skillRs = statement.executeQuery(String.format(GET_SKILL_QUERY, id));
             while (skillRs.next()) {
-                skills.add(new Skill(
-                        skillRs.getInt("id"),
-                        skillRs.getString("name")
-                ));
+                int skillId = skillRs.getInt("id");
+                String skillName = skillRs.getString("name");
+                skills.add(new Skill(skillId, skillName));
             }
-            developer.setSkills(skills);
+            ResultSet devRs = statement.executeQuery(getDevQuery);
+            while (devRs.next()) {
+                int devId = devRs.getInt("id");
+                String devName = devRs.getString("name");
+                Account account = new Account(
+                        devRs.getInt("account_id"),
+                        devRs.getString("email"),
+                        AccountStatus.valueOf(devRs.getString("status"))
+                );
+                developer = new Developer(devId, devName, skills, account);
+            }
             connection.commit();
             connection.setAutoCommit(true);
         } catch (SQLException e) {
@@ -149,26 +143,23 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
 
             ResultSet devRs = statement.executeQuery(getAllQuery);
             while (devRs.next()) {
-                developers.add(new Developer(
-                        devRs.getInt("id"),
-                        devRs.getString("name"),
-                        null,
-                        new Account(
-                                devRs.getInt("account_id"),
-                                devRs.getString("email"),
-                                AccountStatus.valueOf(devRs.getString("status"))
-                        )
-                ));
+                int devId = devRs.getInt("id");
+                String devName = devRs.getString("name");
+                Account account = new Account(
+                        devRs.getInt("account_id"),
+                        devRs.getString("email"),
+                        AccountStatus.valueOf(devRs.getString("status"))
+                );
+                developers.add(new Developer(devId, devName, null, account));
             }
             for (Developer developer : developers) {
                 Set<Skill> skills = new HashSet<>();
                 ResultSet skillRs = statement.executeQuery(String.format(GET_SKILL_QUERY, developer.getId()));
 
                 while (skillRs.next()) {
-                    skills.add(new Skill(
-                            skillRs.getInt("id"),
-                            skillRs.getString("name")
-                    ));
+                    int skillId = skillRs.getInt("id");
+                    String skillName = skillRs.getString("name");
+                    skills.add(new Skill(skillId, skillName));
                 }
                 developer.setSkills(skills);
             }
@@ -188,15 +179,13 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
     @Override
     public boolean update(Developer entity) {
         String updateDevQuery = String.format("UPDATE developers SET name = '%s'," +
-                        "account_id = '%d' WHERE id = '%d';",
+                        "account_id = %d WHERE id = %d;",
                 entity.getName(), entity.getAccount().getId(), entity.getId());
         int updatedRows = 0;
         try (Statement statement = connection.createStatement()) {
             connection.setAutoCommit(false);
             updatedRows = statement.executeUpdate(updateDevQuery);
-
             statement.execute(String.format(DELETE_DEV_SKILL_QUERY, entity.getId()));
-
             for (Skill skill : entity.getSkills()) {
                 statement.addBatch(String.format(INSERT_DEV_SKILL_QUERY, entity.getId(), skill.getId()));
             }
@@ -217,13 +206,13 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
     @Override
     public Developer remove(Long id) {
         Developer developer = get(id);
-        String deleteDevQuery = String.format("DELETE FROM developers WHERE id = '%d';", id);
+        String deleteDevQuery = String.format("DELETE FROM developers WHERE id = %d;", id);
         try (Statement statement = connection.createStatement()) {
             statement.addBatch(deleteDevQuery);
-            statement.addBatch(DELETE_DEV_SKILL_QUERY);
+            statement.addBatch(String.format(DELETE_DEV_SKILL_QUERY, id));
             statement.executeBatch();
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Deleting failed. Trying to cancel transaction...");
+            logger.log(Level.SEVERE, "Deleting failed" + e);
         }
         return developer;
     }
