@@ -5,7 +5,7 @@ import ua.epam.homeTask7.model.AccountStatus;
 import ua.epam.homeTask7.model.Developer;
 import ua.epam.homeTask7.model.Skill;
 import ua.epam.homeTask7.repository.DeveloperRepository;
-import ua.epam.homeTask7.util.ConfigReader;
+import ua.epam.homeTask7.util.ConnectionUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -25,13 +25,11 @@ public class JdbcDeveloperRepo implements DeveloperRepository {
             "VALUES (%d, %d);";
     private final String DELETE_DEV_SKILL_QUERY = "DELETE FROM developer_skills WHERE developer_id = %d;";
 
-    private ConfigReader configReader = ConfigReader.getInstance();
     private Connection connection;
 
     public JdbcDeveloperRepo() {
         try {
-            this.connection = DriverManager.getConnection(configReader.getUrl(),
-                    configReader.getUser(), configReader.getPassword());
+            this.connection = ConnectionUtil.getConnection();
             logger.log(Level.INFO, "Repository connected to database");
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Connection to database failed");

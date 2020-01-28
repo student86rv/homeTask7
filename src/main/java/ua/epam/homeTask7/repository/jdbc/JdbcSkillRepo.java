@@ -2,7 +2,7 @@ package ua.epam.homeTask7.repository.jdbc;
 
 import ua.epam.homeTask7.model.Skill;
 import ua.epam.homeTask7.repository.SkillRepository;
-import ua.epam.homeTask7.util.ConfigReader;
+import ua.epam.homeTask7.util.ConnectionUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -14,13 +14,11 @@ public class JdbcSkillRepo implements SkillRepository {
 
     private static Logger logger = Logger.getLogger(JdbcSkillRepo.class.getName());
 
-    private ConfigReader configReader = ConfigReader.getInstance();
     private Connection connection;
 
     public JdbcSkillRepo() {
         try {
-            this.connection = DriverManager.getConnection(configReader.getUrl(),
-                    configReader.getUser(), configReader.getPassword());
+            this.connection = ConnectionUtil.getConnection();
             logger.log(Level.INFO, "Repository connected to database");
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Connection to database failed");
@@ -35,6 +33,7 @@ public class JdbcSkillRepo implements SkillRepository {
                 ");";
         try (Statement statement = connection.createStatement()) {
             statement.execute(createQuery);
+            logger.log(Level.INFO, "New table was created");
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Table creating failed");
         }
@@ -45,10 +44,8 @@ public class JdbcSkillRepo implements SkillRepository {
         String insertQuery = String.format("INSERT INTO skills (name) VALUES ('%s');",
                 entity.getName());
         String getIdQuery = "SELECT MAX(id) id FROM skills;";
-
         try (Statement statement = connection.createStatement()) {
             statement.execute(insertQuery);
-
             ResultSet rs = statement.executeQuery(getIdQuery);
             int id = 0;
             while (rs.next()) {
@@ -62,7 +59,7 @@ public class JdbcSkillRepo implements SkillRepository {
 
     @Override
     public Skill get(Long id) {
-        String getSkillQuery = String.format("SELECT * FROM skills WHERE id = '%d';", id);
+        String getSkillQuery = String.format("SELECT * FROM skills WHERE id = %d;", id);
         Skill skill = null;
         try (Statement statement = connection.createStatement()) {
             ResultSet rs = statement.executeQuery(getSkillQuery);
@@ -97,7 +94,7 @@ public class JdbcSkillRepo implements SkillRepository {
 
     @Override
     public boolean update(Skill entity) {
-        String updateQuery = String.format("UPDATE skills SET name = ('%s') WHERE id = '%d';",
+        String updateQuery = String.format("UPDATE skills SET name = ('%s') WHERE id = %d;",
                 entity.getName(), entity.getId());
         int updatedRows = 0;
         try (Statement statement = connection.createStatement()) {
@@ -111,7 +108,7 @@ public class JdbcSkillRepo implements SkillRepository {
     @Override
     public Skill remove(Long id) {
         Skill skill = get(id);
-        String removeQuery = String.format("DELETE FROM skills WHERE id = '%d';", id);
+        String removeQuery = String.format("DELETE FROM skills WHERE id = %d;", id);
         try (Statement statement = connection.createStatement()) {
             statement.execute(removeQuery);
         } catch (SQLException e) {

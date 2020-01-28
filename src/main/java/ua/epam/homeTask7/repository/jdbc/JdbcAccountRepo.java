@@ -3,7 +3,7 @@ package ua.epam.homeTask7.repository.jdbc;
 import ua.epam.homeTask7.model.Account;
 import ua.epam.homeTask7.model.AccountStatus;
 import ua.epam.homeTask7.repository.AccountReposirory;
-import ua.epam.homeTask7.util.ConfigReader;
+import ua.epam.homeTask7.util.ConnectionUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -15,13 +15,11 @@ public class JdbcAccountRepo implements AccountReposirory {
 
     private static Logger logger = Logger.getLogger(JdbcAccountRepo.class.getName());
 
-    private ConfigReader configReader = ConfigReader.getInstance();
     private Connection connection;
 
     public JdbcAccountRepo() {
         try {
-            this.connection = DriverManager.getConnection(configReader.getUrl(),
-                    configReader.getUser(), configReader.getPassword());
+            this.connection = ConnectionUtil.getConnection();
             logger.log(Level.INFO, "Repository connected to database");
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Connection to database failed");
@@ -37,6 +35,7 @@ public class JdbcAccountRepo implements AccountReposirory {
                 ");";
         try (Statement statement = connection.createStatement()) {
             statement.execute(createQuery);
+            logger.log(Level.INFO, "New table was created");
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Table creating failed");
         }
@@ -62,7 +61,7 @@ public class JdbcAccountRepo implements AccountReposirory {
 
     @Override
     public Account get(Long id) {
-        String getAccountQuery = String.format("SELECT * FROM accounts WHERE id = '%d';", id);
+        String getAccountQuery = String.format("SELECT * FROM accounts WHERE id = %d;", id);
         Account account = null;
         try (Statement statement = connection.createStatement()) {
             ResultSet rs = statement.executeQuery(getAccountQuery);
@@ -100,7 +99,7 @@ public class JdbcAccountRepo implements AccountReposirory {
     @Override
     public boolean update(Account entity) {
         String updateQuery = String.format("UPDATE accounts SET email = '%s'," +
-                        "status = '%s' WHERE id = '%d';",
+                        "status = '%s' WHERE id = %d;",
                 entity.getEmail(), entity.getStatus().toString(), entity.getId());
         int updatedRows = 0;
         try (Statement statement = connection.createStatement()) {
@@ -114,7 +113,7 @@ public class JdbcAccountRepo implements AccountReposirory {
     @Override
     public Account remove(Long id) {
         Account account = get(id);
-        String removeQuery = String.format("DELETE FROM accounts WHERE id = '%d';", id);
+        String removeQuery = String.format("DELETE FROM accounts WHERE id = %d;", id);
         try (Statement statement = connection.createStatement()) {
             statement.execute(removeQuery);
         } catch (SQLException e) {
