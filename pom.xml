@@ -7,6 +7,8 @@
     <groupId>ua.epam</groupId>
     <artifactId>homeTask7</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+
     <build>
         <plugins>
 
@@ -25,7 +27,7 @@
                 <version>3.5.5</version>
 
                 <executions>
-                    <execution>
+                    <!--<execution>
                         <id>local</id>
                         <phase>process-resources</phase>
                         <goals>
@@ -34,7 +36,8 @@
                         <configuration>
                             <propertyFile>src/main/resources/liquibase/liquibase.properties</propertyFile>
                         </configuration>
-                    </execution>
+                    </execution> -->
+                    <!--
                     <execution>
                         <id>test</id>
                         <phase>process-test-resources</phase>
@@ -44,7 +47,7 @@
                         <configuration>
                             <propertyFile>src/test/resources/liquibase/h2liquibase.properties</propertyFile>
                         </configuration>
-                    </execution>
+                    </execution> -->
                 </executions>
             </plugin>
 
@@ -100,6 +103,13 @@
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-maven-plugin</artifactId>
             <version>3.5.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>

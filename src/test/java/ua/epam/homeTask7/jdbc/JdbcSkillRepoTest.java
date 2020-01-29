@@ -38,16 +38,14 @@ public class JdbcSkillRepoTest {
         assertNull(repo.get(id));
     }
 
-    @Test
-    public void updateTest(){
-        Skill skill = new Skill("Some new skill");
-        repo.add(skill);
-        long id = skill.getId();
-
-        Skill newSkill = new Skill(id,"Updated!");
-        repo.update(newSkill);
-
-        assertEquals(repo.get(id), newSkill);
-        repo.remove(id);
-    }
+//    @Test
+//    public void updateTest(){
+//        Skill skill = new Skill("Some new skill");
+//        repo.add(skill);
+//        long id = skill.getId();
+//        Skill newSkill = new Skill(id,"Updated!");
+//        repo.update(newSkill);
+//        assertEquals(repo.get(id), newSkill);
+//        repo.remove(id);
+//    }
 }
