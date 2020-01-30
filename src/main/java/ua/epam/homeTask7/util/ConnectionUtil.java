@@ -4,6 +4,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -14,13 +15,16 @@ import java.util.logging.Logger;
 public class ConnectionUtil {
 
     private static Logger logger = Logger.getLogger(ConnectionUtil.class.getName());
-    private static final String DB_PROPERTIES_PATH = "src/main/resources/testDb.properties";
-
     private static BasicDataSource dataSource = new BasicDataSource();
     private static Properties properties;
 
     static {
-        properties = readProperties(DB_PROPERTIES_PATH);
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            logger.log(Level.SEVERE, "Database driver registration failed");
+        }
+        properties = readProperties();
         dataSource.setUrl(properties.getProperty("db.url") +
                 "?serverTimezone=" + TimeZone.getDefault().getID());
         dataSource.setUsername(properties.getProperty("db.username"));
@@ -30,9 +34,10 @@ public class ConnectionUtil {
         dataSource.setMaxOpenPreparedStatements(100);
     }
 
-    private static Properties readProperties(String path) {
+    private static Properties readProperties() {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         Properties properties = null;
-        try (FileInputStream fis = new FileInputStream(path)) {
+        try (InputStream fis = classLoader.getResourceAsStream("local.properties")) {
             properties = new Properties();
             properties.load(fis);
         } catch (IOException e) {

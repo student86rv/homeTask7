@@ -10,8 +10,9 @@
     <packaging>war</packaging>
 
     <build>
-        <plugins>
+        <finalName>crudApp</finalName>
 
+        <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -25,10 +26,9 @@
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <version>3.5.5</version>
-
                 <executions>
-                    <!--<execution>
-                        <id>local</id>
+                    <execution>
+                        <id>local_MySQL_setup</id>
                         <phase>process-resources</phase>
                         <goals>
                             <goal>update</goal>
@@ -36,10 +36,9 @@
                         <configuration>
                             <propertyFile>src/main/resources/liquibase/liquibase.properties</propertyFile>
                         </configuration>
-                    </execution> -->
-                    <!--
+                    </execution>
                     <execution>
-                        <id>test</id>
+                        <id>test_H2_DDL_only</id>
                         <phase>process-test-resources</phase>
                         <goals>
                             <goal>update</goal>
@@ -47,10 +46,9 @@
                         <configuration>
                             <propertyFile>src/test/resources/liquibase/h2liquibase.properties</propertyFile>
                         </configuration>
-                    </execution> -->
+                    </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
 
